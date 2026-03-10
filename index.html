@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VIET Smart Gen - Full Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div id="modal-overlay">
+        <div class="ai-popup">
+            <div class="popup-icon">⚠️</div>
+            <h3>Redundancy Alert</h3>
+            <p id="alert-message"></p>
+            <button onclick="closeModal()">Review Question</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="ai-orb"></div>
+                <h2>VIET Smart Gen</h2>
+            </div>
+            
+            <div class="input-section scrollable">
+                <label>Paper Header Details</label>
+                <div class="form-grid">
+                    <input type="text" id="acadYear" placeholder="Academic Year" onkeyup="syncAll()">
+                    <input type="text" id="regulation" placeholder="Regulation" onkeyup="syncAll()">
+                    <input type="text" id="branch" placeholder="Branch (e.g. ECE)" onkeyup="syncAll()">
+                    <input type="text" id="yearSem" placeholder="Year & Sem" onkeyup="syncAll()">
+                    <input type="text" id="midTerm" placeholder="Mid Term" onkeyup="syncAll()">
+                    <input type="text" id="qpSet" placeholder="QP SET" onkeyup="syncAll()">
+                </div>
+                <input type="text" id="subjNameCode" placeholder="Subject Name & Code" onkeyup="syncAll()">
+                <div class="form-grid">
+                    <input type="text" id="maxMarks" placeholder="Max Marks" onkeyup="syncAll()">
+                    <input type="text" id="duration" placeholder="Time" onkeyup="syncAll()">
+                </div>
+
+                <hr class="divider">
+                <label>Question Entry</label>
+                <textarea id="qText" placeholder="Enter question here..."></textarea>
+                <div class="form-grid">
+                    <input type="text" id="qNum" placeholder="Q.No">
+                    <input type="text" id="co" placeholder="CO">
+                    <input type="text" id="blooms" placeholder="Bloom's">
+                    <input type="text" id="marks" placeholder="Marks">
+                </div>
+                <select id="partSelect">
+                    <option value="part-a-body">Part A (Short Answer)</option>
+                    <option value="part-b-body">Part B (Descriptive)</option>
+                </select>
+
+                <div class="used-topics-container" style="margin-top: 20px;">
+                    <label>Topics Already Used</label>
+                    <ul id="used-topics" style="font-size: 12px; color: #3d5afe; font-weight: bold; list-style: none; padding: 0;"></ul>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button onclick="addQuestion()" class="btn-glow">Add Question</button>
+                <button onclick="addOrRow()" class="btn-dark">Add (Or) Row</button>
+                <button onclick="downloadPDF()" class="btn-outline">Download PDF</button>
+            </div>
+        </div>
+
+        <div class="paper-preview">
+            <div class="a4-sheet" id="print-area">
+                <div class="clg-header">
+                    <h3>VISAKHA INSTITUTE OF ENGINEERING & TECHNOLOGY</h3>
+                    <p>Narava, Visakhapatnam</p>
+                    <p class="autonomous-tag">(AUTONOMOUS)</p>
+                    <p><b>B. Tech II Year II-Semester - 1st Mid Examinations January-2026</b></p>
+                    <p><b>QP SET: <span id="v-qpset">---</span></b></p>
+                </div>
+
+                <div class="meta-section">
+                    <div class="meta-col">
+                        <p><b>Academic Year:</b> <span id="v-acad">---</span></p>
+                        <p><b>Branch :</b> <span id="v-branch">---</span></p>
+                        <p><b>Subject name & Code:</b> <span id="v-subj">---</span></p>
+                        <p><b>Max Marks : <span id="v-max">---</span></b></p>
+                    </div>
+                    <div class="meta-col text-right">
+                        <p><b>Regulation:</b> <span id="v-reg">---</span></p>
+                        <p><b>Year & Sem:</b> <span id="v-yearsem">---</span></p>
+                        <p><b>Mid Term:</b> <span id="v-mid">---</span></p>
+                        <p><b>Time:</b> <span id="v-time">---</span></p>
+                    </div>
+                </div>
+
+                <div class="part-header">Part A</div>
+                <table class="official-table">
+                    <thead>
+                        <tr>
+                            <th width="8%">Q. No.</th>
+                            <th width="52%">Question(s)</th>
+                            <th width="12%">Course Outcomes</th>
+                            <th width="18%">Bloom's taxonomy level</th>
+                            <th width="10%">Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="part-a-body"></tbody>
+                </table>
+
+                <div class="part-header" style="margin-top:20px;">Part B</div>
+                <table class="official-table">
+                    <thead>
+                        <tr>
+                            <th width="8%">Q. No.</th>
+                            <th width="52%">Question(s)</th>
+                            <th width="12%">Course Outcomes</th>
+                            <th width="18%">Bloom's taxonomy level</th>
+                            <th width="10%">Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="part-b-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
