@@ -17,11 +17,7 @@ body {
     overflow: hidden; 
 }
 
-.container { 
-    display: flex; 
-    width: 100%; 
-    height: 100%; 
-}
+.container { display: flex; width: 100%; height: 100%; }
 
 .sidebar { 
     width: 400px; 
@@ -62,29 +58,13 @@ input, textarea, select {
     font-size: 14px;
 }
 
-input:focus, textarea:focus {
-    border-color: var(--accent);
-    outline: none;
-}
+input:focus, textarea:focus { border-color: var(--accent); outline: none; }
 
-.form-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 8px; 
-}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-hr.divider {
-    border: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin: 15px 0;
-}
+hr.divider { border: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 15px 0; }
 
-.btn-group { 
-    margin-top: 15px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 8px; 
-}
+.btn-group { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
 
 .btn-glow { 
     background: var(--accent); 
@@ -120,8 +100,8 @@ hr.divider {
 }
 
 .clg-header { text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; }
-.clg-header h3 { margin: 0; font-size: 18pt; }
-.autonomous-tag { color: #d32f2f; font-style: italic; font-weight: bold; margin: 5px 0; }
+.clg-header h3 { margin: 0; font-size: 18pt; font-weight: bold; }
+.autonomous-tag { color: #ff0000; font-style: italic; font-weight: bold; margin: 5px 0; }
 
 .meta-section { 
     display: flex; 
@@ -214,6 +194,3 @@ hr.divider {
     list-style: none; 
     padding: 0;
 }
-
-.text-right { text-align: right; }
-.no-print { user-select: none; }
