@@ -1,13 +1,15 @@
 let globalPaperFingerprints = [];
+let savedQuestions = [];
 
 function syncAll() {
     const fieldMap = {
         'acadYear': 'v-acadyear',
         'regulation': 'v-regulation',
         'branch': 'v-branch',
-        'yearSem': 'v-yearsem',
+        'yearSem': ['v-yearsem', 'v-header-yearsem'],
+        'midTerm': ['v-midterm', 'v-header-mid'],
+        'examMonthYear': 'v-header-monthyear',
         'subjNameCode': 'v-subj',
-        'midTerm': 'v-midterm',
         'maxMarks': 'v-maxmarks',
         'duration': 'v-duration',
         'qpSet': 'v-qpset',
@@ -19,13 +21,19 @@ function syncAll() {
 
     for (let inputId in fieldMap) {
         const input = document.getElementById(inputId);
-        const target = document.getElementById(fieldMap[inputId]);
-        if (input && target) {
+        const targetIds = fieldMap[inputId];
+        if (input) {
             let val = input.value;
-            if (inputId.includes('Marks') && !inputId.includes('max') && val) {
-                target.innerText = "Marks " + val;
+            if (Array.isArray(targetIds)) {
+                targetIds.forEach(id => {
+                    const target = document.getElementById(id);
+                    if (target) target.innerText = val || '---';
+                });
             } else {
-                target.innerText = val || '---';
+                const target = document.getElementById(targetIds);
+                if (target) {
+                    target.innerText = (inputId.includes('Marks') && !inputId.includes('max') && val) ? "Marks " + val : (val || '---');
+                }
             }
         }
     }
@@ -33,7 +41,7 @@ function syncAll() {
 
 function addQuestion() {
     const text = document.getElementById('qText').value.trim();
-    const num = document.getElementById('qNum').value;
+    const num = document.getElementById('qNum').value.trim();
     const co = document.getElementById('co').value;
     const l = document.getElementById('blooms').value;
     const m = document.getElementById('marks').value;
@@ -41,23 +49,22 @@ function addQuestion() {
 
     if (!text || !num) return;
 
-    // Tokenize for redundancy check
-    const noise = ["what", "are", "is", "the", "give", "details", "about", "variety", "different", "of", "and", "with", "write", "explain", "define", "various"];
-    let tokens = text.toLowerCase().replace(/[?!.,]/g, "").split(/\s+/).filter(word => !noise.includes(word) && word.length > 1).map(word => word.replace(/s\b/g, "")); 
-    const currentFingerprint = tokens.sort().join(" ");
+    const noise = ["what", "are", "is", "the", "give", "write", "explain", "define"];
+    let tokens = text.toLowerCase().replace(/[?!.,]/g, "").split(/\s+/).filter(word => !noise.includes(word) && word.length > 1);
+    const fingerprint = tokens.sort().join(" ");
 
-    if (globalPaperFingerprints.includes(currentFingerprint)) {
-        document.getElementById('alert-message').innerText = `STRICT REJECTION: Topic "${tokens.join(" ").toUpperCase()}" already exists!`;
+    if (globalPaperFingerprints.includes(fingerprint)) {
+        document.getElementById('alert-message').innerText = `TOPIC REJECTED: Topic already exists!`;
         document.getElementById('modal-overlay').style.display = 'flex';
         return;
     }
 
-    globalPaperFingerprints.push(currentFingerprint);
-    
+    globalPaperFingerprints.push(fingerprint);
+    savedQuestions.push({ num, text, co, l, m, type: tableId });
+
     const tbody = document.getElementById(tableId);
     const row = document.createElement('tr');
-    row.dataset.fingerprint = currentFingerprint;
-    
+    row.dataset.fingerprint = fingerprint;
     row.innerHTML = `
         <td style="text-align:center">${num}</td>
         <td>${text} <button class="no-print dlt-btn" onclick="deleteRow(this)">Delete</button></td>
@@ -65,16 +72,26 @@ function addQuestion() {
         <td style="text-align:center">${l}</td>
         <td style="text-align:center">${m}</td>
     `;
-    
     tbody.appendChild(row);
+
+    if (tableId === 'part-b-body' && num.toLowerCase().includes('(b)') && parseInt(num) % 2 !== 0) {
+        addOrRow();
+    }
+
     updateTopicList();
     document.getElementById('qText').value = "";
 }
 
+function addOrRow() {
+    const tbody = document.getElementById('part-b-body');
+    const row = document.createElement('tr');
+    row.innerHTML = `<td colspan="5" style="text-align:center; font-weight:bold; height:30px; background:#f9f9f9; border: 1px solid black;">(Or) <button class="no-print dlt-btn" onclick="this.closest('tr').remove()">Delete</button></td>`;
+    tbody.appendChild(row);
+}
+
 function deleteRow(btn) {
     const row = btn.closest('tr');
-    const fingerprint = row.dataset.fingerprint;
-    globalPaperFingerprints = globalPaperFingerprints.filter(f => f !== fingerprint);
+    globalPaperFingerprints = globalPaperFingerprints.filter(f => f !== row.dataset.fingerprint);
     row.remove();
     updateTopicList();
 }
@@ -89,16 +106,30 @@ function updateTopicList() {
     });
 }
 
-function addOrRow() {
-    const row = `<tr><td colspan="5" style="text-align:center; font-weight:bold; height:30px; background:#f9f9f9;">(Or) <button class="no-print dlt-btn" onclick="this.closest('tr').remove()">Delete</button></td></tr>`;
-    document.getElementById('part-b-body').innerHTML += row;
+function saveAsJSON() {
+    const faculty = document.getElementById('facultyName').value.trim() || "Faculty";
+    const subjCode = document.getElementById('subjNameCode').value.trim() || "NoCode";
+    const midTerm = document.getElementById('midTerm').value.trim() || "Mid-X";
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+
+    const paperData = {
+        metadata: { faculty, subjCode, midTerm, timestamp },
+        content: savedQuestions
+    };
+
+    const blob = new Blob([JSON.stringify(paperData, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.download = `${faculty}-${subjCode}-${midTerm}-${timestamp}.json`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
 }
 
 function clearAll() {
-    if(confirm("Wipe the entire paper clean?")) {
+    if(confirm("Wipe paper and start fresh?")) {
         document.getElementById('part-a-body').innerHTML = "";
         document.getElementById('part-b-body').innerHTML = "";
         globalPaperFingerprints = [];
+        savedQuestions = [];
         updateTopicList();
     }
 }
@@ -108,11 +139,9 @@ function closeModal() { document.getElementById('modal-overlay').style.display =
 async function downloadPDF() {
     const dltBtns = document.querySelectorAll('.no-print');
     dltBtns.forEach(b => b.style.visibility = 'hidden');
-
     const canvas = await html2canvas(document.getElementById('print-area'), { scale: 2 });
     const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 297);
-    pdf.save("VIET_Official_Paper.pdf");
-
+    pdf.save(`VIET_QP_${Date.now()}.pdf`);
     dltBtns.forEach(b => b.style.visibility = 'visible');
 }
